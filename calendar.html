@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Calendar</title>
+        <link rel="stylesheet" href="style.css">
+        <meta charset="utf-8">
+    </head>
+    <body onload="getDates()">
+        <br>
+        <div class="container" id="main">
+            <div class="title">
+                <a href="#" onClick="getOtherYear()" class="nav">&larr;&nbsp;</a>
+                <h1 id="year"></h1>
+                <a href="#" onClick="getOtherYear(true)" class="nav">&nbsp;&rarr;</a>
+            </div>
+
+            <div class="modalBg" id="modalBg"></div>
+            <div class="overlapModalBg" id="overlapModalBg"></div>
+            <div id="eventModal" class="modal">
+                <button onclick="closeModal()" id="closeBtn" class="closeBtn">&#10006;</button>
+                <list class="modalNav">
+                    <li><a href="javascript:void(0);" onClick="switchTab('add')" class="modalNav">Add Event</a></li>
+                    <li><a href="javascript:void(0);" onClick="switchTab('view')" class="modalNav">View Events</a></li>
+                </list>
+                <form id="eventForm">
+                    <div class="formWrapper">
+                        <h3>Add New Event</h3>
+                        <label for="eventName">Event Name: </label>
+                        <input type="text" id="eventName">
+                        <span id="nameValidationResult" class="validationResult"></span>
+                        <br>
+                        <label for="eventDesc">Event Description: </label>
+                        <textarea id="eventDesc"></textarea>
+                        <br>
+                        <label for="eventDate">Event Date: </label>
+                        <input type="date" id="eventDate">
+                        <br>
+                        <label for="eventStart">Event Start: </label>
+                        <input type="time" id="eventStart" name='eventStart' value="08:00" min="00:00" max="23:59" required onchange="validateTime()"/>
+                        <br>
+                        <label for="eventEnd">Event End: </label>
+                        <input type="time" id="eventEnd" name='eventEnd' value="09:00" min="00:00" max="23:59" required onchange="validateTime()"/>
+                        <br>
+                        <label for="allDay">All Day Event? </label>
+                        <input type="checkbox" id="allDay" onchange="validateTime()">
+                        <span id="timeValidationResult" class="validationResult"></span>
+                        <br>
+                        <button onclick="submitEvent(false)" id="submitBtn">Save</button>
+                        <br>
+                    </div>
+                </form>
+                <div id="eventList">
+                    <h3>Event List</h3>
+                    <br>
+                    <div id="eventData">
+                        <table id="eventDataList" class="currentEvents">
+                            <span id="eventDataNameValidationResult" class="validationResult"></span>
+                            <span id="eventDataTimeValidationResult" class="validationResult"></span>
+                            <thead>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Is All Day Event?</th>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="searchModal" class="modal">
+                <button onclick="closeSearchModal()" id="closeSearchBtn" class="closeBtn">&#10006;</button>
+                <form id="searchForm">
+                    <div class="formWrapper">
+                        <h3>Search For Event</h3>
+                        <div>
+                            <input type="radio" id="searchByDate" name="searchBy" value="Search By Date" onChange="change(true)">
+                            <label for="searchByDate">Search By Date</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="searchByName" name="searchBy" value="Search By Name" onChange="change(false)">
+                            <label for="searchByName">Search By Name</label>
+                        </div>
+                        
+                        <br>
+                        <label for="searchValue">Search Value: </label>
+                        <input type="date" id="searchDate">
+                        <textarea id="searchValue" style="display: none;"></textarea>
+                        <br>
+                        <span id="resultMessage" class="validationResult"></span>
+                        <button onclick="searchEvent()" id="submitBtn">Search</button>
+                        <br>
+                    </div>
+                </form>
+                <div id="resultList">
+                    <h3>Result List</h3>
+                    <br>
+                    <div id="resultData">
+                        <table id="resultDataList" class="currentEvents">
+                            <span id="searchResultNameValidationResult" class="validationResult"></span>
+                            <span id="searchResultTimeValidationResult" class="validationResult"></span>
+                            <thead>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Is All Day Event?</th>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="overlapModal" class="modal">
+                <span>Proceed with the creation of the overlapping event?</span>
+                <button id="overlapConfirmation" onclick="submitEvent(true)">&#10004;</button>
+                <button id="overlapCancel" onclick="closeConfirmationModal()">&#10006;</button>
+            </div>
+            <div id="overlayBtnContainer">
+                <button class="overlayBtn" onclick="addNew()">&nbsp;+&nbsp;</button>
+                <button class="overlayBtn" onclick="search()">&nbsp;&#x1F50D;&nbsp;</button>
+                <button class="overlayBtn" onclick="exportToCSV()">&nbsp;&#10515;&nbsp;</button>
+            </div>
+
+            <div class="row">
+                <div class="column">
+                    <table id="January" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">January</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="February" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">February</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="March" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">March</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <table id="April" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">April</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="May" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">May</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="June" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">June</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <table id="July" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">July</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="August" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">August</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="September" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">September</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <table id="October" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">October</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="November" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">November</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="column">
+                    <table id="December" class="month">
+                        <thead>
+                            <tr>
+                                <th colspan="7">December</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script src="script.js"></script>
+    </body>
+</html>
